@@ -10,7 +10,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetUser } from '../auth/decorators/get-user.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateRegistryItemDto } from './dto/create-registry-item.dto';
@@ -61,5 +66,12 @@ export class RegistryItemsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @GetUser('sub') userId: string) {
     return this.registryService.remove(id, userId);
+  }
+
+  @Patch(':id/confirm-delivery')
+  @ApiOperation({ summary: 'Confirm delivery of purchased gift' })
+  @ApiResponse({ status: 200, description: 'Delivery confirmed' })
+  confirmDelivery(@Param('id') id: string, @GetUser('sub') userId: string) {
+    return this.registryService.confirmDelivery(id, userId);
   }
 }

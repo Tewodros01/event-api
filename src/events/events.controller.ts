@@ -8,9 +8,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { GetUser } from '../auth/decorators/get-user.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -34,8 +35,21 @@ export class EventsController {
   }
 
   @Get()
-  findAll(@GetUser('sub') userId: string) {
-    return this.eventsService.findAll(userId);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  findAll(
+    @GetUser('sub') userId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('status') status?: string,
+  ) {
+    return this.eventsService.findAll(
+      userId,
+      parseInt(page),
+      parseInt(limit),
+      status,
+    );
   }
 
   @Get(':id')

@@ -10,7 +10,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { GetUser } from '../auth/decorators/get-user.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateGuestDto } from './dto/create-guest.dto';
@@ -66,5 +71,15 @@ export class GuestController {
     @GetUser('sub') userId: string,
   ) {
     return this.guestService.remove(id, eventId, userId);
+  }
+
+  @Get(':eventId/analytics')
+  @ApiOperation({ summary: 'Get guest attendance analytics' })
+  @ApiResponse({ status: 200, description: 'Analytics retrieved successfully' })
+  getAnalytics(
+    @Param('eventId') eventId: string,
+    @GetUser('sub') userId: string,
+  ) {
+    return this.guestService.getAnalytics(eventId, userId);
   }
 }

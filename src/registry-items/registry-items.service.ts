@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -93,6 +94,27 @@ export class RegistryItemsService {
 
     return this.prisma.registryItem.delete({
       where: { id },
+    });
+  }
+
+  async confirmDelivery(id: string, userId: string): Promise<RegistryItem> {
+    const item = await this.prisma.registryItem.findFirst({
+      where: { id, event: { userId } },
+    });
+
+    if (!item) {
+      throw new NotFoundException('Registry item not found');
+    }
+
+    if (item.status !== 'PURCHASED') {
+      throw new BadRequestException(
+        'Only purchased items can be marked as delivered',
+      );
+    }
+
+    return this.prisma.registryItem.update({
+      where: { id },
+      data: { status: 'DELIVERED' },
     });
   }
 }

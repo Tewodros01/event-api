@@ -25,13 +25,6 @@ export class EventsService {
     }
   }
 
-  async findAll(userId: string): Promise<Event[]> {
-    const events = await this.prisma.event.findMany({
-      where: { userId },
-    });
-    return events;
-  }
-
   async findOne(id: string, userId: string): Promise<Event> {
     const event = await this.prisma.event.findFirst({
       where: { id, userId },
@@ -75,5 +68,31 @@ export class EventsService {
     return this.prisma.event.delete({
       where: { id },
     });
+  }
+
+  async findAll(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    status?: string,
+  ): Promise<{ data: Event[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const where: any = { userId };
+
+    if (status) {
+      where.status = status;
+    }
+
+    const [events, total] = await Promise.all([
+      this.prisma.event.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.event.count({ where }),
+    ]);
+
+    return { data: events, total, page, limit };
   }
 }
